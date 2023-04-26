@@ -5,7 +5,9 @@ from random_pattern import RandomPattern
 COLUMNS = 7
 ROWS = 6
 
+
 def board_has_winner(board):
+    pass
 
 
 def board_can_be_played(board):

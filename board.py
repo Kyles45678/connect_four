@@ -11,7 +11,7 @@ class Board:
         for i in range(0, self.height):
             if self.spaces[column][i] is not None:
                 self.spaces[column][i - 1] = piece
-                return True
+                return i - 1, column
 
     def is_column_full(self, column):
         if self.spaces[column][0] is None:
