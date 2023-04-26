@@ -6,7 +6,30 @@ COLUMNS = 7
 ROWS = 6
 
 
-def board_has_winner(board):
+def pieces_in_direction(board, color, column, row, found, column_change, row_change):
+    if board.get_piece(column, row) is not None and board.get_piece(column, row).color == color:
+        return pieces_in_direction(board, color, column
+                                   + column_change, row + row_change, found + 1, column_change, row_change)
+    return found
+
+
+def board_has_winner(piece, board):
+    found = (pieces_in_direction(board, piece.color, piece.column, piece.row, 1, 1, 0)
+             + pieces_in_direction(board, piece.color, piece.column, piece.row, 1, -1, 0))
+    if found >= 4:
+        return True
+    found = (pieces_in_direction(board, piece.color, piece.column, piece.row, 1, 0, 1)
+             + pieces_in_direction(board, piece.color, piece.column, piece.row, 1, 0, -1))
+    if found >= 4:
+        return True
+    found = (pieces_in_direction(board, piece.color, piece.column, piece.row, 1, 1, 1)
+             + pieces_in_direction(board, piece.color, piece.column, piece.row, 1, -1, -1))
+    if found >= 4:
+        return True
+    found = (pieces_in_direction(board, piece.color, piece.column, piece.row, 1, 1, -1)
+             + pieces_in_direction(board, piece.color, piece.column, piece.row, 1, -1, 1))
+    if found >= 4:
+        return True
     pass
 
 
@@ -15,12 +38,11 @@ def board_can_be_played(board):
 
 
 def run_game(board, agent1, agent2):
-
     print("---------------- STARTING GAME ----------------")
     board.print_board()
 
     current_player = agent1
-    while not board_has_winner(board) and board_can_be_played(board):
+    while board_can_be_played(board):
         print(str(current_player) + "'s turn!")
         current_player.play_move()
         board.print_board()
@@ -30,10 +52,11 @@ def run_game(board, agent1, agent2):
         else:
             current_player = agent1
 
-    if board_has_winner(board):
-        print("We have a winner!")
-    elif not board_can_be_played(board):
-        print("Stalemate! WAAHHHH!!!!")
+    # if board_has_winner(board):
+    #     print("We have a winner!")
+    # elif not board_can_be_played(board):
+    #     print("Stalemate! WAAHHHH!!!!")
+
 
 def main():
     board = Board(COLUMNS, ROWS)

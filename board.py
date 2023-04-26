@@ -19,6 +19,8 @@ class Board:
         return True
 
     def get_piece(self, column, row):
+        if column > self.width or column < 0 or row > self.height or row < 0:
+            return None
         return self.spaces[column][row]
 
     def print_board(self):
@@ -39,4 +41,3 @@ class Board:
             if not self.is_column_full(i):
                 return False
         return True
-
