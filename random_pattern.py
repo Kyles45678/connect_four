@@ -16,7 +16,9 @@ class RandomPattern:
         if len(playable_columns) > 0:
             chosen_col = random.choice(playable_columns)
             piece = Piece(0, 0, agent.name)
-            placed_row, placed_col = self.board.place_piece(self, chosen_col, piece)
+            (placed_row, placed_col) = self.board.place_piece(chosen_col, piece)
+            if placed_row == -1:
+                return None
             piece.set_pos(placed_row, placed_col)
             return piece
         else:

@@ -7,7 +7,7 @@ class Board:
 
     def place_piece(self, column, piece):
         if self.is_column_full(column):
-            return False
+            return -1, -1
         for i in range(0, self.height):
             if self.spaces[column][i] is not None:
                 self.spaces[column][i - 1] = piece
