@@ -11,6 +11,12 @@ class Agent:
 
     def set_board(self, b):
         self.board = b
-        
+
     def play_move(self):
         self.pattern.act(self)
+
+    def __str__(self):
+        return f"{self.name}"
+
+    def __repr__(self):
+        return f"{self.name}"
