@@ -8,7 +8,7 @@ class Board:
     def place_piece(self, column, piece):
         if self.is_column_full(column):
             return False
-        for i in range(0, len(self.spaces[column])):
+        for i in range(0, self.height):
             if self.spaces[column][i] is not None:
                 self.spaces[column][i - 1] = piece
                 return True
@@ -23,8 +23,8 @@ class Board:
 
     def print_board(self):
         board_string = ""
-        for i in range(0, len(self.spaces)):
-            for x in range(0, len(self.spaces[i])):
+        for i in range(0, self.width):
+            for x in range(0, self.height):
                 if self.spaces[i][x] is not None:
                     board_string += str(self.spaces[i][x])
                 else:
@@ -33,3 +33,10 @@ class Board:
 
     def clear_board(self):
         self.spaces = [[None] * self.width] * self.height
+
+    def is_board_full(self):
+        for i in range(0, self.width):
+            if not self.is_column_full(i):
+                return False
+        return True
+
