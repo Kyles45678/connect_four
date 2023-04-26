@@ -45,6 +45,7 @@ def run_game(board, agent1, agent2):
 
     current_player = agent1
     # print(board.width)
+    # print(len(board.spaces))
     # print(board.spaces[0][0])
     print(board_can_be_played(board))
     while board_can_be_played(board):
@@ -56,7 +57,9 @@ def run_game(board, agent1, agent2):
         elif not board_can_be_played(board):
             print("Stalemate! WAAHHHH!!!!")
             break
+
         board.print_board()
+        # print(board.print_board())
         print("-------- turn over --------")
         if current_player == agent1:
             current_player = agent2
