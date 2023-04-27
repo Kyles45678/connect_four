@@ -15,23 +15,18 @@ def pieces_in_direction(board, color, column, row, found, column_change, row_cha
 
 def board_has_winner(piece, board):
     if piece is not None:
-        found = (pieces_in_direction(board, piece.color, piece.column, piece.row, 1, 1, 0)
-                 + pieces_in_direction(board, piece.color, piece.column, piece.row, 1, -1, 0))
-        if found >= 4:
+        if (1 + (pieces_in_direction(board, piece.color, piece.col + 1, piece.row, 0, 1, 0)
+                 + pieces_in_direction(board, piece.color, piece.col - 1, piece.row, 0, -1, 0))) >= 4:
             return True
-        found = (pieces_in_direction(board, piece.color, piece.column, piece.row, 1, 0, 1)
-                 + pieces_in_direction(board, piece.color, piece.column, piece.row, 1, 0, -1))
-        if found >= 4:
+        if (1 + (pieces_in_direction(board, piece.color, piece.col, piece.row + 1, 0, 0, 1)
+                 + pieces_in_direction(board, piece.color, piece.col, piece.row - 1, 0, 0, -1))) >= 4:
             return True
-        found = (pieces_in_direction(board, piece.color, piece.column, piece.row, 1, 1, 1)
-                 + pieces_in_direction(board, piece.color, piece.column, piece.row, 1, -1, -1))
-        if found >= 4:
+        if (1 + (pieces_in_direction(board, piece.color, piece.col + 1, piece.row + 1, 0, 1, 1)
+                 + pieces_in_direction(board, piece.color, piece.col - 1, piece.row - 1, 0, -1, -1))) >= 4:
             return True
-        found = (pieces_in_direction(board, piece.color, piece.column, piece.row, 1, 1, -1)
-                 + pieces_in_direction(board, piece.color, piece.column, piece.row, 1, -1, 1))
-        if found >= 4:
+        if (1 + (pieces_in_direction(board, piece.color, piece.col + 1, piece.row - 1, 0, 1, -1)
+                 + pieces_in_direction(board, piece.color, piece.col - 1, piece.row + 1, 0, -1, 1))) >= 4:
             return True
-        pass
     return False
 
 
@@ -44,13 +39,11 @@ def run_game(board, agent1, agent2):
     board.print_board()
 
     current_player = agent1
-    # print(board.width)
-    # print(len(board.spaces))
-    # print(board.spaces[0][0])
-    print(board_can_be_played(board))
     while board_can_be_played(board):
         print(str(current_player) + "'s turn!")
         piece = current_player.play_move()
+        board.print_board()
+        # print(board_has_winner(piece, board))
         if board_has_winner(piece, board):
             print("We have a winner!")
             break
@@ -58,8 +51,7 @@ def run_game(board, agent1, agent2):
             print("Stalemate! WAAHHHH!!!!")
             break
 
-        board.print_board()
-        # print(board.print_board())
+        # board.print_board()
         print("-------- turn over --------")
         if current_player == agent1:
             current_player = agent2

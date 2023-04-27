@@ -13,7 +13,7 @@ class Agent:
         self.board = b
 
     def play_move(self):
-        self.pattern.act(self)
+        return self.pattern.act(self)
 
     def __str__(self):
         return f"{self.name}"
