@@ -1,5 +1,8 @@
+from piece import Piece
+
+
 class Board:
-    def __init__(self, width, height):
+    def __init__(self, width=1, height=1):
         self.width = width
         self.height = height
         self.spaces = [[None for i in range(height)] for j in range(width)]
@@ -25,20 +28,42 @@ class Board:
         return self.spaces[column][row]
 
     def print_board(self):
-        for i in range(0, self.height):
-            board_string = ""
-            for x in range(0, self.width):
-                if self.spaces[x][i] is not None:
-                    board_string += str(self.spaces[x][i])
-                else:
-                    board_string += "*"
-            print(board_string)
+        print(self.to_string())
+
 
     def clear_board(self):
-        self.spaces = [[None] * self.width] * self.height
+        self.spaces = [[None for i in range(self.height)] for j in range(self.width)]
 
     def is_board_full(self):
         for i in range(0, self.width):
             if not self.is_column_full(i):
                 return False
         return True
+
+    def to_string(self):
+        board_string = ""
+        for i in range(self.height):
+            for x in range(self.width):
+                if self.spaces[x][i] is not None:
+                    board_string += str(self.spaces[x][i])
+                else:
+                    board_string += "*"
+                board_string += " "
+            board_string = board_string.strip()
+            board_string += "\n"
+        return board_string.strip();
+
+    def parse_string(self, string):
+        lines = string.strip().split("\n")
+        self.height = len(lines)
+        self.width = len(lines[0].strip().split(" "))
+        self.clear_board()
+        for r in range(self.height):
+            line = lines[r].strip().split(" ")
+            for c in range(self.width):
+                char = line[c]
+                if char == "*":
+                    self.spaces[c][r] = None
+                else:
+                    p = Piece(c, r, char)
+                    self.spaces[c][r] = p
