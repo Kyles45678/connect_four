@@ -23,20 +23,20 @@ def run_game(board, agent1, agent2):
     current_player = agent1
     while board_can_be_played(board):
         turns += 1
-        print(str(current_player) + "'s turn!")
+        # print(str(current_player) + "'s turn!")
         piece = current_player.play_move()
-        # board.last_played_piece = piece
-        board.print_board()
+        board.last_played_piece = piece
+        # board.print_board()
         if board.board_has_winner(piece):
-            # board.is_end_state = True
-            # board.winner = current_player.color
-            print("We have a winner! Its " + str(current_player) + "!")
+            board.is_end_state = True
+            board.winner = current_player.name
+            # print("We have a winner! Its " + str(current_player) + "!")
             winner = str(current_player)
             break
         elif not board_can_be_played(board):
-            # board.is_end_state = True
-            # board.winner = "Stalemate"
-            print("Stalemate! WAAHHHH!!!!")
+            board.is_end_state = True
+            board.winner = "Stalemate"
+            # print("Stalemate! WAAHHHH!!!!")
             winner = "Stalemate"
             break
 
@@ -53,7 +53,7 @@ def main():
     stats = [0, 0, [0, 0, 0]]
     for i in range(1):
         board = Board(COLUMNS, ROWS)
-        agent1 = Agent(board, SmartPattern(board, 1), "Yellow")
+        agent1 = Agent(board, SmartPattern(board, 5), "Yellow")
         agent2 = Agent(board, RandomPattern(board), "Red")
 
         game_stats = run_game(board, agent1, agent2)
@@ -65,7 +65,7 @@ def main():
             stats[2][1] += 1
         else:
             stats[2][2] += 1
-        print(stats)
+    print(stats)
 
 
 main()

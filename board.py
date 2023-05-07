@@ -1,4 +1,5 @@
 import copy
+import numpy as np
 
 from piece import Piece
 
@@ -9,11 +10,11 @@ class Board:
         self.height = height
         self.spaces = [[None for i in range(height)] for j in range(width)]
         # possible other needed vars
-        # self.last_played_piece = None
-        # self.is_end_state = False
-        # self.win_ratio = 0.0
-        # self.winner = None
-        # self.outcomes = np.zeros(3, int)
+        self.last_played_piece = None
+        self.is_end_state = False
+        self.win_ratio = 0.0
+        self.winner = None
+        self.outcomes = np.zeros(3, int)
 
 
     def place_piece(self, column, piece):
