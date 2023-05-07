@@ -1,3 +1,5 @@
+import copy
+
 from piece import Piece
 
 
@@ -6,6 +8,13 @@ class Board:
         self.width = width
         self.height = height
         self.spaces = [[None for i in range(height)] for j in range(width)]
+        # possible other needed vars
+        # self.last_played_piece = None
+        # self.is_end_state = False
+        # self.win_ratio = 0.0
+        # self.winner = None
+        # self.outcomes = np.zeros(3, int)
+
 
     def place_piece(self, column, piece):
         if self.is_column_full(column):
@@ -15,7 +24,7 @@ class Board:
                 self.spaces[column][i - 1] = piece
                 return column, i - 1
         self.spaces[column][self.height - 1] = piece
-        return column, self.height-1
+        return column, self.height - 1
 
     def is_column_full(self, column):
         if self.spaces[column][0] is None:
@@ -29,7 +38,6 @@ class Board:
 
     def print_board(self):
         print(self.to_string())
-
 
     def clear_board(self):
         self.spaces = [[None for i in range(self.height)] for j in range(self.width)]
@@ -67,3 +75,39 @@ class Board:
                 else:
                     p = Piece(c, r, char)
                     self.spaces[c][r] = p
+
+    def pieces_in_direction(self, color, column, row, found, column_change, row_change):
+        if self.get_piece(column, row) is not None and self.get_piece(column, row).color == color:
+            return self.pieces_in_direction(color, column
+                                            + column_change, row + row_change, found + 1, column_change, row_change)
+        return found
+
+    def board_has_winner(self, piece):
+        if piece is not None:
+            if (1 + (self.pieces_in_direction(piece.color, piece.col + 1, piece.row, 0, 1, 0)
+                     + self.pieces_in_direction(piece.color, piece.col - 1, piece.row, 0, -1, 0))) >= 4:
+                return True
+            if (1 + (self.pieces_in_direction(piece.color, piece.col, piece.row + 1, 0, 0, 1)
+                     + self.pieces_in_direction(piece.color, piece.col, piece.row - 1, 0, 0, -1))) >= 4:
+                return True
+            if (1 + (self.pieces_in_direction(piece.color, piece.col + 1, piece.row + 1, 0, 1, 1)
+                     + self.pieces_in_direction(piece.color, piece.col - 1, piece.row - 1, 0, -1, -1))) >= 4:
+                return True
+            if (1 + (self.pieces_in_direction(piece.color, piece.col + 1, piece.row - 1, 0, 1, -1)
+                     + self.pieces_in_direction(piece.color, piece.col - 1, piece.row + 1, 0, -1, 1))) >= 4:
+                return True
+        return False
+
+    def find_possible_moves(self):
+        playable_columns = []
+        for c in range(self.width):
+            if not self.is_column_full(c):
+                playable_columns.append(c)
+        return playable_columns
+
+    def copy(self):
+        b = Board()
+        b.spaces = copy.deepcopy(self.spaces)
+        b.width = self.width
+        b.height = self.height
+        return b

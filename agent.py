@@ -11,6 +11,7 @@ class Agent:
 
     def set_board(self, b):
         self.board = b
+        self.pattern.board = b
 
     def play_move(self):
         return self.pattern.act(self)

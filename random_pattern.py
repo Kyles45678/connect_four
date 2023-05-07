@@ -8,10 +8,7 @@ class RandomPattern:
         self.board = board
 
     def act(self, agent):
-        playable_columns = []
-        for c in range(self.board.width):
-            if not self.board.is_column_full(c):
-                playable_columns.append(c)
+        playable_columns = self.board.find_possible_moves()
 
         if len(playable_columns) > 0:
             chosen_col = random.choice(playable_columns)
