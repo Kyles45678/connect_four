@@ -33,7 +33,6 @@ class MCTree:
         root.outcomes[:] = 0
 
         if root.is_end_state:
-            # _, winner = root.determine_winner()
             winner = root.winner
             root.outcomes[winner] = 1
         else:

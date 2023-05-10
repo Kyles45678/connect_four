@@ -133,5 +133,4 @@ class BoardState:
         b = BoardState(self.board.copy())
         b.winner = self.winner
         b.is_end_state = self.is_end_state
-        # return BoardState(self.board.copy())
         return b
