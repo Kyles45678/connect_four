@@ -1,114 +1,137 @@
-import copy
 import numpy as np
 
-from piece import Piece
+from move import Move
+
+PLAYER_1 = 1
+PLAYER_2 = 2
+EMPTY = 0
 
 
-class Board:
-    def __init__(self, width=1, height=1):
-        self.width = width
-        self.height = height
-        self.spaces = [[None for i in range(height)] for j in range(width)]
-        # possible other needed vars
-        self.last_played_piece = None
-        self.is_end_state = False
-        self.win_ratio = 0.0
-        self.winner = None
+class BoardState:
+    def __init__(self, board=None):
+        if board is None:
+            self.board = np.zeros((6, 7), int)
+        else:
+            self.board = board
+
+        self.n_rows = 6
+        self.n_columns = 7
         self.outcomes = np.zeros(3, int)
+        self.win_frac = 0.0
+        self.is_end_state = False
+        self.winner = None
 
+    def in_board(self, row, column):
+        if 0 <= column < self.n_columns and 0 <= row < self.n_rows:
+            return True
+        return False
 
-    def place_piece(self, column, piece):
-        if self.is_column_full(column):
-            return -1, -1
-        for i in range(0, self.height):
-            if self.spaces[column][i] is not None:
-                self.spaces[column][i - 1] = piece
-                return column, i - 1
-        self.spaces[column][self.height - 1] = piece
-        return column, self.height - 1
+    def pieces_in_direction(self, move, column, row, found, column_change, row_change):
+        if self.in_board(row, column) and self.board[row, column] == move.player:
+            return self.pieces_in_direction(move, column
+                                            + column_change, row + row_change, found + 1, column_change, row_change)
+        return found
+
+    def board_has_winner(self, move):
+        if (1 + (self.pieces_in_direction(move, move.column + 1, move.row, 0, 1, 0)
+                 + self.pieces_in_direction(move, move.column - 1, move.row, 0, -1, 0))) >= 4:
+            return True
+        if (1 + (self.pieces_in_direction(move, move.column, move.row + 1, 0, 0, 1)
+                 + self.pieces_in_direction(move, move.column, move.row - 1, 0, 0, -1))) >= 4:
+            return True
+        if (1 + (self.pieces_in_direction(move, move.column + 1, move.row + 1, 0, 1, 1)
+                 + self.pieces_in_direction(move, move.column - 1, move.row - 1, 0, -1, -1))) >= 4:
+            return True
+        if (1 + (self.pieces_in_direction(move, move.column + 1, move.row - 1, 0, 1, -1)
+                 + self.pieces_in_direction(move, move.column - 1, move.row + 1, 0, -1, 1))) >= 4:
+            return True
+        return False
+
+    def is_initial_state(self):
+        return (self.board == EMPTY).all()
+
+    def __hash__(self):
+        return hash(tuple(self.board.flatten()))
+
+    def __eq__(self, other):
+        return (self.board == other.board).all()
+
+    def __repr__(self):
+        return str(self.board)
+
+    def determine_next_player(self):
+        n_player1_pieces = np.count_nonzero(self.board.flatten() == PLAYER_1)
+        n_player2_pieces = np.count_nonzero(self.board.flatten() == PLAYER_2)
+
+        if n_player1_pieces == n_player2_pieces:
+            next_player = PLAYER_1
+        else:
+            next_player = PLAYER_2
+
+        return next_player
+
+    def determine_previous_player(self):
+        n_player1_pieces = np.count_nonzero(self.board.flatten() == PLAYER_1)
+        n_player2_pieces = np.count_nonzero(self.board.flatten() == PLAYER_2)
+
+        if n_player1_pieces == 0 and n_player2_pieces == 0:
+            player = EMPTY
+        elif n_player1_pieces == n_player2_pieces:
+            player = PLAYER_2
+        else:
+            player = PLAYER_1
+
+        return player
+
+    def enumerate_moves(self):
+        if self.is_end_state:
+            return []
+
+        next_player = self.determine_next_player()
+
+        moves = []
+        for c in range(self.n_columns):
+            if not self.is_column_full(c):
+                r = self.get_row(c)
+                move = Move(next_player, r, c)
+                moves.append(move)
+        return moves
 
     def is_column_full(self, column):
-        if self.spaces[column][0] is None:
+        if self.board[0, column] == EMPTY:
             return False
         return True
 
-    def get_piece(self, column, row):
-        if column >= self.width or column < 0 or row >= self.height or row < 0:
-            return None
-        return self.spaces[column][row]
-
-    def print_board(self):
-        print(self.to_string())
-
-    def clear_board(self):
-        self.spaces = [[None for i in range(self.height)] for j in range(self.width)]
+    def get_row(self, column):
+        for i in range(0, self.n_rows):
+            if self.board[i, column] != EMPTY:
+                return i - 1
+        return self.n_rows-1
 
     def is_board_full(self):
-        for i in range(0, self.width):
+        for i in range(0, self.n_columns):
             if not self.is_column_full(i):
                 return False
         return True
 
-    def to_string(self):
-        board_string = ""
-        for i in range(self.height):
-            for x in range(self.width):
-                if self.spaces[x][i] is not None:
-                    board_string += str(self.spaces[x][i])
-                else:
-                    board_string += "*"
-                board_string += " "
-            board_string = board_string.strip()
-            board_string += "\n"
-        return board_string.strip();
-
-    def parse_string(self, string):
-        lines = string.strip().split("\n")
-        self.height = len(lines)
-        self.width = len(lines[0].strip().split(" "))
-        self.clear_board()
-        for r in range(self.height):
-            line = lines[r].strip().split(" ")
-            for c in range(self.width):
-                char = line[c]
-                if char == "*":
-                    self.spaces[c][r] = None
-                else:
-                    p = Piece(c, r, char)
-                    self.spaces[c][r] = p
-
-    def pieces_in_direction(self, color, column, row, found, column_change, row_change):
-        if self.get_piece(column, row) is not None and self.get_piece(column, row).color == color:
-            return self.pieces_in_direction(color, column
-                                            + column_change, row + row_change, found + 1, column_change, row_change)
-        return found
-
-    def board_has_winner(self, piece):
-        if piece is not None:
-            if (1 + (self.pieces_in_direction(piece.color, piece.col + 1, piece.row, 0, 1, 0)
-                     + self.pieces_in_direction(piece.color, piece.col - 1, piece.row, 0, -1, 0))) >= 4:
-                return True
-            if (1 + (self.pieces_in_direction(piece.color, piece.col, piece.row + 1, 0, 0, 1)
-                     + self.pieces_in_direction(piece.color, piece.col, piece.row - 1, 0, 0, -1))) >= 4:
-                return True
-            if (1 + (self.pieces_in_direction(piece.color, piece.col + 1, piece.row + 1, 0, 1, 1)
-                     + self.pieces_in_direction(piece.color, piece.col - 1, piece.row - 1, 0, -1, -1))) >= 4:
-                return True
-            if (1 + (self.pieces_in_direction(piece.color, piece.col + 1, piece.row - 1, 0, 1, -1)
-                     + self.pieces_in_direction(piece.color, piece.col - 1, piece.row + 1, 0, -1, 1))) >= 4:
-                return True
-        return False
-
-    def find_possible_moves(self):
-        playable_columns = []
-        for c in range(self.width):
-            if not self.is_column_full(c):
-                playable_columns.append(c)
-        return playable_columns
+    def play_move(self, move: Move):
+        if self.board[move.row, move.column] != EMPTY:
+            print(self.board, move)
+            print(self.board[move.row, move.column], EMPTY)
+            raise Exception("Cannot place piece at (r, c)".format(move.row, move.column))
+        else:
+            self.board[move.row, move.column] = move.player
+            is_winner = self.board_has_winner(move)
+            if is_winner:
+                self.is_end_state = True
+                self.winner = move.player
+            elif self.is_board_full():
+                self.is_end_state = True
+                self.winner = 0
 
     def copy(self):
-        b = Board()
-        b.spaces = copy.deepcopy(self.spaces)
-        b.width = self.width
-        b.height = self.height
+        b = BoardState(self.board.copy())
+        b.winner = self.winner
+        b.is_end_state = self.is_end_state
+        # return BoardState(self.board.copy())
         return b

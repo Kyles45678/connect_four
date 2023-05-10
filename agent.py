@@ -1,23 +1,10 @@
+from board import BoardState
+
 
 class Agent:
 
-    def __init__(self, board, init_pattern, name):
-        self.board = board
+    def __init__(self, init_pattern):
         self.pattern = init_pattern
-        self.name = name
 
-    def set_pattern(self, p):
-        self.pattern = p
-
-    def set_board(self, b):
-        self.board = b
-        self.pattern.board = b
-
-    def play_move(self):
-        return self.pattern.act(self)
-
-    def __str__(self):
-        return f"{self.name}"
-
-    def __repr__(self):
-        return f"{self.name}"
+    def play_move(self, board_state: BoardState):
+        return self.pattern.act(board_state)

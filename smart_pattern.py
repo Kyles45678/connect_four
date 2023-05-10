@@ -1,22 +1,15 @@
-from mc_tree import MCTree
-from node import Node
-from piece import Piece
+from board import BoardState
 
 
-# from piece import Piece
-
-#
 class SmartPattern:
-
-    def __init__(self, board, paths_sampled):
+    def __init__(self, tree, paths_sampled):
+        self.tree = tree
         self.paths_sampled = paths_sampled
-        self.board = board.copy()
-        self.tree = MCTree(self.board, paths_sampled)
 
-    def act(self, agent):
-        self.tree.set_root(self.board)
-        self.tree.run_paths(agent)
-        self.tree.determine_outcomes(self.tree.root)
+    def act(self, board_state: BoardState):
+        self.tree.reroot_tree(board_state)
+        self.tree.sample_paths(self.paths_sampled)
+        self.tree.propagate_outcomes()
         policy = self.tree.find_policy()
-        piece = policy[self.board]
-        agent.board.place_piece(piece.col, piece)
+        move = policy[board_state]
+        board_state.play_move(move)

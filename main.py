@@ -1,71 +1,44 @@
-from agent import Agent
-from board import Board
-from random_pattern import RandomPattern
 import time
-
+from agent import Agent
+from board import BoardState
+from mctree import MCTree
+from random_pattern import RandomPattern
 from smart_pattern import SmartPattern
 
-COLUMNS = 7
-ROWS = 6
+PLAYER1 = 1
+PLAYER2 = 2
 
 
-def board_can_be_played(board):
-    return not board.is_board_full()
-
-
-def run_game(board, agent1, agent2):
+def play_game(agent1, agent2):
+    board_state = BoardState()
+    current_agent = agent1
+    other_agent = agent2
     turns = 0
-    winner = None
-    start = time.perf_counter()
-    # print("---------------- STARTING GAME ----------------")
-    # board.print_board()
-
-    current_player = agent1
-    while board_can_be_played(board):
+    while not board_state.is_end_state:
         turns += 1
-        # print(str(current_player) + "'s turn!")
-        piece = current_player.play_move()
-        board.last_played_piece = piece
-        # board.print_board()
-        if board.board_has_winner(piece):
-            board.is_end_state = True
-            board.winner = current_player.name
-            # print("We have a winner! Its " + str(current_player) + "!")
-            winner = str(current_player)
-            break
-        elif not board_can_be_played(board):
-            board.is_end_state = True
-            board.winner = "Stalemate"
-            # print("Stalemate! WAAHHHH!!!!")
-            winner = "Stalemate"
-            break
+        current_agent.play_move(board_state)
+        tmp = current_agent
+        current_agent = other_agent
+        other_agent = tmp
 
-        # print("-------- turn over --------")
-        if current_player == agent1:
-            current_player = agent2
-        else:
-            current_player = agent1
-    game_time = time.perf_counter() - start
-    return [game_time, turns, winner]
+    return [turns, board_state.winner]
 
 
-def main():
+def analysis(num_of_games, agent1_pattern, agent2_pattern):
     stats = [0, 0, [0, 0, 0]]
-    for i in range(1):
-        board = Board(COLUMNS, ROWS)
-        agent1 = Agent(board, SmartPattern(board, 5), "Yellow")
-        agent2 = Agent(board, RandomPattern(board), "Red")
-
-        game_stats = run_game(board, agent1, agent2)
-        stats[0] += game_stats[0]
-        stats[1] += game_stats[1]
-        if game_stats[2] == "Yellow":
+    start = time.perf_counter()
+    for i in range(num_of_games):
+        game_stats = play_game(Agent(agent1_pattern), Agent(agent2_pattern))
+        stats[1] += game_stats[0]
+        if game_stats[1] == PLAYER1:
             stats[2][0] += 1
-        elif game_stats[2] == "Red":
+        elif game_stats[1] == PLAYER2:
             stats[2][1] += 1
         else:
             stats[2][2] += 1
+    stats[0] = time.perf_counter() - start
     print(stats)
 
 
-main()
+analysis(50, RandomPattern(), SmartPattern(MCTree(), 10))
+# analysis(50, SmartPattern(MCTree(), 10), RandomPattern())
